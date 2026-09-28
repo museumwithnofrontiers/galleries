@@ -1,143 +1,55 @@
-# website-template
+# MWNF Galleries
 
-Template repository for MWNF websites. Every new website repo
-(`museumwithnofrontiers/<dataset>`, public) is created **once** from this template — it is
-never installed as a dependency and never updated in existing websites.
+The galleries hub of Museum With No Frontiers: every MWNF gallery, and the
+Partners of the *MWNF Galleries* project. It replaces
+<https://galleries.museumwnf.org>.
 
-**Its role.** This template is the generic scaffold for a new kind of
-product — Explore (inventory-app#1745), the galleries hub (inventory-app#1744) — built on
-viewer-core's data layer and viewer-layout's composed views. A new gallery or
-a new exhibition, one of the DXA family, starts from
-[`gallery-template`](https://github.com/museumwithnofrontiers/gallery-template)
-or [`exhibition-template`](https://github.com/museumwithnofrontiers/exhibition-template).
-The three templates stay separate on purpose (decision D5 of the platform's
-[architecture reference](https://github.com/museumwithnofrontiers/inventory-app/issues/1510), which also says what goes where
-across the packages and what a site's files are called).
+Live at <https://museumwithnofrontiers.github.io/galleries/>.
 
-Every website live today was created from this template, the galleries and
-exhibitions included, before they had templates of their own. Package CI,
-propagation and the organization site's list find a website through its link
-to any of the three templates.
-
-A website is a light, static Vue 3 front-end for one published dataset. It
-combines these `@museumwnf` packages from npmjs:
+It is a light, static Vue 3 front-end on the MWNF website platform, created
+from [`website-template`](https://github.com/museumwithnofrontiers/website-template)
+(class `standalone`) and built from these `@museumwnf` packages on npmjs:
 
 | Package | Role |
 | --- | --- |
-| `@museumwnf/<dataset>-data` | the dataset (JSON + `manifest.json`) |
-| `@museumwnf/viewer-core` | application engine (routing, data access, texts, language, shared views) |
-| `@museumwnf/viewer-layout` | page structure (`PageShell` + sections), themed via `theme/tokens.css` |
-| `@museumwnf/viewer-i18n` | the shared texts of this kind of website |
+| `@museumwnf/galleries-data` | the hub's data: the galleries it lists and its partner directory |
+| `@museumwnf/viewer-core` | application engine (routing, data access, texts, language) |
+| `@museumwnf/viewer-layout` | page structure and the shared components, themed via `theme/tokens.css` |
+| `@museumwnf/viewer-i18n` | the shared texts |
+
+## What the hub shows
+
+| Page | Address | What it shows |
+| --- | --- | --- |
+| Home | `#/` | Four galleries picked at random, the three MWNF virtual museums, and three partners picked at random. Legacy drew both picks per request. |
+| Galleries | `#/galleries` | Every gallery: the count, a list to jump to one, an A–Z / Z–A toggle, four featured at random, then the grid with each gallery's icon. Every gallery links to its own site. |
+| Partners | `#/partners` | The partner directory, grouped by country, each marked Partner or Affiliate |
+| A partner | `#/partner/<id>` | The partner's profile |
+| About, Credits | `#/about`, `#/credits` | Legacy's texts |
+
+Legacy's addresses still work: `#/list` and `#/list/<page>` open the galleries
+page, and `#/partner/<database>/<country>/<museum>/<language>` opens that
+partner.
+
+**What the hub does not show.** The hub ships no items: no item sheets, no
+partner objects and no timeline (decided on 2026-09-28, inventory-app#1744).
+Each gallery's own site carries those. The data package is specified in
+inventory-app's
+[`scripts/exporters/docs/galleries-hub-data-package.md`](https://github.com/museumwithnofrontiers/inventory-app/blob/main/scripts/exporters/docs/galleries-hub-data-package.md).
+
+## Where things are
+
+- **`src/dataset.config.js`:** the whole declaration: routes, languages, menu, legacy addresses.
+- **`src/composables/hub.js`:** the hub's records and what it derives from them (names, links, random picks, the partner view).
+- **`src/views/`:** the home page, the galleries list, the partner list and the partner page, composed from viewer-layout's shared components.
+- **`src/assets/galleries/`:** each gallery's icon, named after the gallery's legacy key. These are legacy's own pictures, which only ever lived in its client.
+- **`locales/en.json`:** the hub's own texts. About, Credits and the partners intro come from legacy.
+
+The hub is English only: legacy carried its own texts in English alone. The
+offered languages follow the one platform rule, read from the partners' texts
+because the hub has no items.
 
 ---
-
-## Admin — creating a new website
-
-1. **Run the tool.** From a `viewer-workflows` checkout (or its container, the
-   same way `propagate.mjs` runs):
-
-   ```
-   node tools/new-website.mjs --slug <slug> --class standalone --namespace <ns> --title "<Site name>" [--dry-run] [--settings-only] [--no-merge]
-   ```
-
-   - `--slug` — the dataset key (e.g. `islamicart`), used for the repo name
-     (`museumwithnofrontiers/<slug>`) and the data package
-     (`@museumwnf/<slug>-data`); replaces every `__DATASET__` placeholder.
-   - `--class` — `standalone` for a product website (a whole virtual museum),
-     created from this template. The same tool creates a DXA site from its
-     family's template with `--class gallery` or `--class exhibition` (and its
-     `--palette`) — that is the family template's README, not this one. Sets
-     `viewerI18n.class` and picks the shared texts bundle
-     this website receives — see
-     [`viewer-i18n`](https://github.com/museumwithnofrontiers/viewer-i18n) for
-     what each bundle contains. Replaces every `__SITE_CLASS__` placeholder.
-   - `--namespace` — this website's own texts namespace: one lowercase word,
-     no hyphens (`carpets`, `waterInIslam`). Sets `viewerI18n.namespace`.
-     Replaces every `__SITE_NAMESPACE__` placeholder.
-   - `--title` — the site's display name, used wherever the scaffold needs a
-     human-readable name.
-   - `--dry-run` — print what the tool would do without creating or changing
-     anything.
-   - `--settings-only` — re-applies the repo settings below to an existing
-     repo, without creating one or opening the first PR; this is also how to
-     re-apply them later if a setting has drifted or the tool has gained a new
-     one.
-   - `--no-merge` — opens the first PR but leaves it for review instead of
-     merging it.
-
-   The tool creates the repository from this template under the org, enables
-   **Pages** (source: GitHub Actions), creates the `main-requires-pr` ruleset
-   and the classic branch protection with the four required checks (`ci /
-   Build (blocking)`, `ci / Test (blocking)`, `ci / Texts (blocking)`,
-   `locales / Validate locale files`), switches on allow-auto-merge,
-   delete-branch-on-merge, CodeQL default setup, and Dependabot security fixes
-   and alerts, verifies the template link, then opens the first PR: it
-   replaces the placeholders above and installs `@museumwnf/<slug>-data@latest`
-   — using `@latest` rather than a bare `npm install` so it resolves whatever
-   major the dataset has actually reached, meaning this step cannot be wrong
-   for a dataset published past 1.x (the data package must already be
-   published on npmjs for this to succeed) — and commits `package-lock.json`,
-   which CI needs because it runs `npm ci`.
-
-   There is nothing to register with `viewer-core`/`viewer-layout`/`viewer-i18n`
-   or the dataset package for this: a website is discovered from the
-   `website-template` link GitHub records when the repository is created, so it
-   becomes a downstream consumer of all four the moment it exists, and every
-   one of them is public — no access grant to request.
-
-   The tool needs an operator logged in with `gh` and admin rights on the org;
-   it never stores a token.
-
-   **What the tool does not do**, which stays by hand afterwards:
-   - The **texts PR** — this website's editorial copy comes from the
-     extractor, not the tool. See inventory-app's
-     [`docs/deployment/new-website.md`](https://github.com/museumwithnofrontiers/inventory-app/blob/main/docs/deployment/new-website.md).
-   - The **catalogue and sheet declaration** — step 2 below.
-   - The **theme** — see "Webdesigner — theming the website" below.
-   - The **`.new-architecture/<slug>` submodule** pointer in inventory-app —
-     also documented in `docs/deployment/new-website.md` above.
-2. **Declare the search, the catalogue and the sheet.** A scaffolded website
-   already has five real pages — a landing page, a search form, a results
-   page, a record page and an About page — and none of them is written here:
-   they are the composed views of `@museumwnf/viewer-layout/views` (see
-   "Composed views" below), driven by declarations. The records come from
-   `src/composables/data.js`, viewer-core's catalogue data layer
-   (`useCatalogue`: the entities, labels, routes and the result row). The
-   search, results and record pages read `catalogueSearchSpec`,
-   `catalogueResultsSpec` and `itemSheetSpec` from
-   `src/composables/catalogue.js`: `catalogueSearchSpec` says which fields the
-   keyword rows search (viewer-core's field search); `catalogueResultsSpec`
-   says what the results page filters on (the keyword rows, the facets, the
-   date rule, the page size) and which parts of `itemRow` a row shows;
-   `itemSheetSpec` says which fields a record shows, in what order, under which
-   `sheet.field.*` labels. A spec module exports `…Spec`, named after its
-   section and page.
-   Adjust them to the dataset — a facet is one line in `facets` and one in
-   `controls`, a field is one line — and the cards and the record on display
-   come from `home` in `src/dataset.config.js`. The About page reads its own
-   `about` declaration, next to `home` in the same file; replace its
-   `__SITE_NAMESPACE__.about.body` text in `locales/en.json` with what the
-   dataset is and who published it. A page that is not one of the composed
-   views' shape is the website's own component on the same content
-   components, registered on the same route name.
-3. **Merge the first PR** (the placeholder replacement). The deploy workflow
-    publishes the site to `https://museumwithnofrontiers.github.io/<dataset>/`.
-
-The CI, deploy and audit workflows carry an
-`if: ${{ !endsWith(github.repository, '/website-template') }}` guard so the
-template itself — which has no lockfile and an unresolvable `__DATASET__`
-dependency — does not report failing checks. It checks the repository name
-rather than a fixed owner, so it keeps working across any future rename or
-move of the owning account; the condition is false only in a repository
-actually named `website-template`, so it is true in every repository created
-from the template and the checks simply run there.
-
-The deployed base path comes from the `BASE_PATH` environment variable at
-build time; the deploy workflow defaults it to `/<repo>/` for Pages. For a
-root deployment (custom domain), pass `base_path: /` to the deploy workflow.
-
----
-
 ## Translator — editing the website's texts
 
 You only need a GitHub account and a browser. The files under `locales/` hold
@@ -173,6 +85,9 @@ A text is **just text**, formatted with Markdown if you want: `**bold**`,
 `*italic*`, `[a link](https://example.org)`. It may not contain HTML tags, and
 it may not contain `{` or `}` — nothing is ever inserted into a text, so a
 number or a date is placed next to it by the website rather than inside it.
+
+---
+
 
 ---
 
@@ -215,177 +130,29 @@ For real design work, use the live preview:
 
 ---
 
+---
+
 ## Developer notes
 
-The platform has one architecture, and every website follows it. These are its
-rules; each one exists because a site that broke it cost something real. The
-pass that imposed them is metanull/inventory-app#1683, and the scaffold in this
-repository already obeys all eleven — a new website starts compliant and stays
-that way by not undoing them.
+Develop and test in Docker, like every MWNF website:
 
-**1. `src/dataset.config.js` is the whole declaration.** Routes, languages,
-shell, media host, outbound links. Before the application mounts, the website
-reads nothing from its package but `manifest.json`. `src/main.js` needs no edit
-after the placeholders are replaced.
+```bash
+docker compose up
+docker compose run --rm dev npm test
+```
 
-### A gallery or an exhibition
+The smoke test (`tests/smoke.test.js`) mounts every page against the real data
+package: the galleries list against every gallery the package carries, the
+partner directory against every partner with its status, and both legacy
+redirects.
 
-Does not start here. A DXA gallery or exhibition starts from
-[`gallery-template`](https://github.com/museumwithnofrontiers/gallery-template)
-or [`exhibition-template`](https://github.com/museumwithnofrontiers/exhibition-template),
-whose pages, shell and routes are the family's (`@museumwnf/viewer-layout/dxa`),
-so the site holds only its own values (decision D5 of the
-[architecture reference](https://github.com/museumwithnofrontiers/inventory-app/issues/1510)).
-
-**2. Records and translations come from viewer-core, lazily.** `src/composables/data.js`
-is viewer-core's catalogue data layer (`useCatalogue`, over `entityRef`,`
-byId`, `loadTranslations`, `translations`, `tr`), and holds no state of its
-own. Nothing in `src/` imports `@inventory-data` directly, and nothing
-keeps a second cache. In particular, never resolve a language with an
-interpolated dynamic import: `` import(`@inventory-data/translations/items.${lang}.json`) ``
-cannot be resolved statically, so a bundler pulls in every language of that
-entity eagerly. On a large dataset that is a build which never finishes in CI —
-which is what happened, on three sites.
-
-**3. Glossary highlighting is the renderer's.** Pass `[{ id, spelling }]` to
-`md`/`mdInline` and viewer-core marks each occurrence while it parses. Wrapping
-a `<span>` into the text beforehand puts markup where a record's text should be,
-and it is escaped like any other raw HTML.
-
-**4. One site language, negotiated once.** `offeredLanguages()` in the config
-decides what the site offers: what the package declares for it, kept where the
-items carry content. Never derive it from `manifest.languages`, which lists
-every language the project ever touched — most with no translation file, so the
-switcher would offer languages whose pages are all English.
-
-**5. A record's language is not the site's.** An item sheet reads
-`useRecordLanguage(record, { entity: 'items' })`: the site language where the
-record carries it, English where it does not, the record's first language
-otherwise. The visitor may toggle it there, and that toggle never touches the
-site language or the address.
-
-**6. Every field is Markdown, escaped in one place.** `md`, `mdInline` and
-`mdStrip` in the composable are viewer-core's renderers and the only place a
-record becomes HTML. A tag that slipped past the importer appears on the page as
-the characters it is; when that happens the fix belongs in the importer, not in
-a view.
-
-**7. The shell is `@museumwnf/viewer-layout`'s `SiteShell`, from config.**
-`src/SiteShell.vue` only mounts it and fills the `#brand` slot with the
-header lockup, because a label is a text and a text needs the running
-application; the menu, the language switcher and the link lists are built by
-`SiteShell` itself from `config.navigation` (see the package's README, "Site
-shell"). A shape it cannot express is a request to
-[`viewer-layout`](https://github.com/museumwithnofrontiers/viewer-layout), not a chrome
-component built here.
-
-**8. One routing convention.** Every route named, sections kebab-case, the page
-and all filters in the query, `meta.entities` naming what the view reads.
-Addresses the site used to publish go in `legacyRoutes`, redirect-only. The
-catch-all is viewer-core's; do not declare a second one.
-
-**9. A website owns its theme, and nothing else.** `theme/tokens.css` for the
-chrome, `src/styles/site.css` for the views' own content styles. Layout belongs
-to `viewer-layout`, behaviour to `viewer-core`.
-
-**10. CI is thin and pinned.** The five workflows below call
-`museumwithnofrontiers/viewer-workflows` at an exact version.
-
-**11. A page is composed of platform components, or is the site's own by
-choice.** The landing page, the results page, the record page and the About
-page are viewer-layout's `HomeView`, `CatalogueResultsView`, `RecordView` and
-`TextPageView`, named in `views` (the first three) or on their own route (the
-last) and driven by a declaration — what the page filters on, which fields it
-shows, under which labels. No page here carries a copy of the query state,
-the pagination, a facet builder, a date predicate, a field engine, a glossary
-handler or a result row: those are viewer-core's, once, and the components
-are viewer-layout's. A page whose shape the composed views do not have is a
-component of this website, written on the same content components and
-registered on the same route name; that is a choice made in the open, not a
-copy made by habit.
-
-### Composed views
-
-Nine whole pages, made of viewer-layout's content components on viewer-core's
-engine, that a website names in a declaration instead of writing. This
-template already names three of them (`HomeView`, `CatalogueResultsView`,
-`RecordView`, in `config.views`) and one more on its own route
-(`TextPageView`, for the About page). The other five are there for the page
-a website adds next — an essay page, a partner list, a search form, a link
-list, a timeline — without writing one from scratch. Full declarations and
-slots are in [`viewer-layout`](https://github.com/museumwithnofrontiers/viewer-layout)'s
-README, "Composed views".
-
-| View | One line |
-| --- | --- |
-| `HomeView` | The landing page: a title, an intro, section cards and one featured record. |
-| `CatalogueResultsView` | A filtered, paginated list or grid of one entity, from a facet/control spec. |
-| `RecordView` | One record's sheet: fields, sections, media, credits, related records. |
-| `EssayView` | A themed page in a tree (an exhibition theme, a chapter), with navigation, tabs and a picture panel. |
-| `LinkListView` | A titled list of link groups — further reading, external resources. |
-| `TextPageView` | One block of body text and an optional back link — this template's About page. |
-| `TimelineResultsView` | A filtered timeline of dated events, with an entrance-only mode for the form alone. |
-| `PartnerListView` | Partners grouped by country or tier, with an optional A-Z toggle. |
-| `SearchFormView` | An advanced-search entrance: keyword rows, facets or one-at-a-time radio choices. |
-
-A page whose shape none of these have is the website's own component, on the
-same content components (`@museumwnf/viewer-layout/content`), registered on
-the same route name — the escape hatch stays open; nothing about a composed
-view is mandatory.
-
-Two more things worth knowing before writing a page:
-
-- **Texts come from two layers**, merged in `src/main.js` with `mergeMessages`:
-  the `@museumwnf/viewer-i18n` bundle for this kind of website, then this
-  website's `locales/`, which wins. Read one with `$t('name')` in a template or
-  `useI18n()` from `@museumwnf/viewer-core` in a script, and render Markdown with
-  `<I18nText keypath="…">`. Entry names must be **written out in full** at the
-  call site: CI checks that every one resolves, and it can only check the names
-  it can see. Nothing is ever interpolated into a text — a number or a date is
-  placed next to it by the view.
-- **`npm run test`** runs `tests/smoke.test.js`, on the shared testing kit
-  (`mountSite`, `checkRoutes`, `checkSectionMeta`, `checkTextsRendered` from
-  `@museumwnf/viewer-core/testing`) rather than a local copy of the same
-  mounting and assertion code every website used to carry. It asserts the
-  rules above that a test can reach: named routes with a section each,
-  declared entities, no generic entity pages, the landing page's cards, the
-  results page's rows and filter panel, the record page's sheet, the About
-  page's body text, and the language rule through `checkOfferedLanguages`.
-  Add website-specific tests next to it. There is no Markdown test here — the
-  renderers are viewer-core's and are tested there.
-
-And on rule 10, the pinned CI:
-
-- CI (`.github/workflows/`) is a set of thin callers of
-  [`museumwithnofrontiers/viewer-workflows`](https://github.com/museumwithnofrontiers/viewer-workflows);
-  build, test and texts block, ESLint + `npm audit` report, text-only PRs
-  validate and auto-merge, a weekly audit opens issues on findings.
-- Those callers pin an **exact** `viewer-workflows` version, never a moving
-  major tag. Do not "simplify" them to `@v1`: that tag is frozen at v1.1.2 and
-  force-moving it would deploy unverified CI to every website at once. New
-  releases arrive as a Dependabot pull request — the `github-actions` ecosystem
-  covers reusable-workflow refs — so this site's own CI validates a release
-  before it is adopted, and green minor/patch bumps auto-merge.
-- **`@museumwnf` npm packages are deliberately not managed by Dependabot.**
-  They publish publicly to npmjs, which Dependabot can read without a token —
-  the GitHub Packages restriction that used to block it is gone — but
-  `.github/dependabot.yml` still ignores the scope, and it stays that way by
-  design: website-template is not a propagate target (a new site's platform
-  versions are set once, at creation, from what live sites already run), so
-  the versions declared here are updated by hand instead, deliberately kept
-  close to what the release-then-propagate run has already put on live
-  sites. An independent Dependabot bump here could hand a newly scaffolded
-  site a platform version no live site has run yet. Dependabot still keeps
-  third-party dependencies and GitHub Actions current, which both resolve
-  fine. The procedure, and the reasoning, are in
-  [MAINTENANCE.md](https://github.com/museumwithnofrontiers/viewer-workflows/blob/main/MAINTENANCE.md).
+---
 
 ## Licence
 
-This package is Content of the MWNF Website under the [MWNF legal
+This website is Content of the MWNF Website under the [MWNF legal
 notice](https://www.museumwnf.org/about/legal-notice), which governs its use
 (non-commercial, personal, educational and scientific use is permitted, with
 attribution and mandatory reporting — see the notice for the full terms). The
-notice text also ships in this package as `LICENSE.md`. Every website
-scaffolded from this template inherits both the notice and the `license`
-field in `package.json`.
+notice text also ships in this repository as `LICENSE.md`.
+
