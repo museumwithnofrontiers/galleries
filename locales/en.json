@@ -1,13 +1,12 @@
 {
   "galleries.identity.organisation": "Museum With No Frontiers",
-  "galleries.identity.title": "galleries",
+  "galleries.identity.title": "MWNF Galleries",
   "galleries.identity.copyright": "© Museum With No Frontiers",
-  "galleries.home.intro": "Welcome to galleries.",
-  "galleries.home.catalogueText": "Browse every item by country and date.",
-  "galleries.home.searchText": "Search the items by name, location, material or any other field.",
-  "galleries.home.itemOnDisplay": "Item on display",
-  "galleries.nav.catalogue": "Catalogue",
-  "galleries.nav.search": "Search",
+  "galleries.home.intro": "Discover MWNF Galleries: artefacts gathered by medium and by type of object, contributed by Partners from many countries.",
+  "galleries.home.aboutText": "What MWNF Galleries are, and how to explore them.",
+  "galleries.home.creditsText": "Who made this website, and with whom.",
   "galleries.nav.about": "About",
-  "galleries.about.body": "This website is published by Museum With No Frontiers. Replace this text with what galleries is and who made it."
+  "galleries.nav.credits": "Credits",
+  "galleries.about.body": "This website is published by Museum With No Frontiers.",
+  "galleries.credits.body": "Museum With No Frontiers."
 }
