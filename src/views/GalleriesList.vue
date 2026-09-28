@@ -43,7 +43,7 @@ function jump(event) {
       </select>
       <p class="hub-galleries__count">{{ t('galleries.list.count') }} {{ (galleries ?? []).length }}</p>
       <button type="button" class="mwnf-button hub-galleries__toggle" @click="reversed = !reversed">
-        {{ t(reversed ? 'galleries.list.sortAscending' : 'galleries.list.sortDescending') }}
+        {{ reversed ? t('galleries.list.sortAscending') : t('galleries.list.sortDescending') }}
       </button>
     </div>
 

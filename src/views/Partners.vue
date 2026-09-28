@@ -2,7 +2,7 @@
 import { I18nText, useI18n, useProjects } from '@museumwnf/viewer-core'
 import { BackLink, PartnerPanel } from '@museumwnf/viewer-layout/content'
 import { PartnerListView } from '@museumwnf/viewer-layout/views'
-import { partnerList, partnerStatusEntry } from '../composables/hub.js'
+import { isCuratedPartner, partnerList } from '../composables/hub.js'
 
 // The hub's partner directory, on the platform's composed partner list: the
 // grouping by country, the A–Z / Z–A toggle and the query are the view's.
@@ -24,7 +24,8 @@ const projects = useProjects()
         <PartnerPanel variant="line" :partner="view" :show="{ actions: true }">
           <template #meta>
             <p class="hub-partners__status">
-              {{ projects.label(partner.project_uuids?.[0]) }} {{ t(partnerStatusEntry(partner)) }}
+              {{ projects.label(partner.project_uuids?.[0]) }}
+              {{ isCuratedPartner(partner) ? t('galleries.partner.statusPartner') : t('galleries.partner.statusAffiliate') }}
             </p>
           </template>
         </PartnerPanel>

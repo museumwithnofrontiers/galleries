@@ -121,6 +121,6 @@ export const partnerDetail = {
  * Legacy's "Partner" or "Affiliate": a partner curated at level `partner` in
  * the hub's project is a Partner, one with no level an Affiliate.
  */
-export function partnerStatusEntry(partner) {
-  return partner?.level === 'partner' ? 'galleries.partner.statusPartner' : 'galleries.partner.statusAffiliate'
+export function isCuratedPartner(partner) {
+  return partner?.level === 'partner'
 }
