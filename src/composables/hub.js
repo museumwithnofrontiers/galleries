@@ -122,5 +122,5 @@ export const partnerDetail = {
  * the hub's project is a Partner, one with no level an Affiliate.
  */
 export function partnerStatusEntry(partner) {
-  return partner?.level === 'partner' ? 'galleries.partner.status.partner' : 'galleries.partner.status.affiliate'
+  return partner?.level === 'partner' ? 'galleries.partner.statusPartner' : 'galleries.partner.statusAffiliate'
 }
