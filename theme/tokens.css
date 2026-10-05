@@ -15,6 +15,8 @@
   --mwnf-color-text: #263238;
   --mwnf-color-background: #eceff1;
   --mwnf-color-accent: #36474f;
+  /* The shared components' links, in the slate they have always had here. */
+  --mwnf-link-text: #36474f;
   --mwnf-color-muted: #555555;
   --mwnf-color-border: #90a4ad;
   --mwnf-content-width: 64rem;
