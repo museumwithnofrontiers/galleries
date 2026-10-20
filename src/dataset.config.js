@@ -1,8 +1,10 @@
 import {
   languageLabels, loadEntities, mwnfLinks, offeredLanguages, sectionMeta, useDataPackage,
 } from '@museumwnf/viewer-core'
+import { mwnfSocialLinks } from '@museumwnf/viewer-layout'
+import { GalleryShell } from '@museumwnf/viewer-layout/dxa'
 import { TextPageView } from '@museumwnf/viewer-layout/views'
-import SiteShell from './SiteShell.vue'
+import { chrome } from './chrome.js'
 import HubHome from './views/HubHome.vue'
 import GalleriesList from './views/GalleriesList.vue'
 import Partners from './views/Partners.vue'
@@ -61,26 +63,65 @@ export default {
   // The site language. One per visit, negotiated once by viewer-core.
   languages,
 
-  shell: SiteShell,
+  // Legacy's hub is a DXA gallery (dxa-client, site galleries, gallery 45),
+  // so its chrome is the gallery family's shell, fed from `galleryShell`
+  // below rather than from a gallery package.
+  shell: GalleryShell,
 
-  // Everything viewer-layout's SiteShell reads to build the menu, the
-  // language switcher and the header/footer link lists.
+  // Everything the shell reads to build the menu, the language switcher and
+  // the header/footer link lists: legacy's menu (About · All Galleries ·
+  // Partners · Credits), under the banner on the home page and above it
+  // elsewhere; "Home" in the header; MWNF's pages and its social networks in
+  // the footer.
   navigation: {
     languages: languageLabels(languages),
     links: [
-      { section: 'home', label: 'core.nav.home', to: { name: 'home' } },
-      { section: 'galleries', label: 'galleries.nav.galleries', to: { name: 'galleries' } },
-      { section: 'partners', label: 'core.nav.partners', to: { name: 'partners' } },
       { section: 'about', label: 'galleries.nav.about', to: { name: 'about' } },
+      { section: 'galleries', label: 'gallery.nav.allGalleries', to: { name: 'galleries' } },
+      { section: 'partners', label: 'core.nav.partners', to: { name: 'partners' } },
       { section: 'credits', label: 'galleries.nav.credits', to: { name: 'credits' } },
     ],
+    headerLinks: [{ label: 'core.nav.home', to: { name: 'home' } }],
+    footerLinks: [
+      { label: 'core.footer.aboutMwnf', href: mwnfLinks.about, external: true },
+      { label: 'core.footer.contact', href: mwnfLinks.contact, external: true },
+      { label: 'core.footer.legalNotice', href: mwnfLinks.legalNotice, external: true },
+      { label: 'core.footer.credits', href: mwnfLinks.credits, external: true },
+      { label: 'core.footer.cookies', href: mwnfLinks.cookies, external: true },
+    ],
+    placement: ({ section }) => (section === 'home' ? 'after-banner' : 'before-banner'),
+    socialLinks: mwnfSocialLinks,
   },
 
-  // Where this website's media lives: the legacy media server carries the
-  // gallery pictures whose paths the package ships.
-  media: {
-    legacyHost: 'https://images.museumwnf.org',
+  // Legacy's banner: a strip with the hub's name on the home page, its "»"
+  // leading to the galleries list; a section strip on every other page.
+  banner: {
+    variant: ({ section }) => (section === 'home' ? 'strip' : 'section'),
+    captionLabel: 'layout.banner.detailFrom',
+    enter: ({ section, t }) => (section === 'home'
+      ? { label: '»', href: '#/galleries', ariaLabel: t('gallery.nav.allGalleries') }
+      : null),
   },
+
+  // What a gallery's package would give the shell: the hub's name in the
+  // header on inner pages and over the home banner, with no line above
+  // either (legacy's "Welcome to" has no source), and gallery 45's banner.
+  // The banner's caption needs its item, which the hub package doesn't ship.
+  // Legacy's hub has no search, so no "Database replaced" tip either.
+  galleryShell: {
+    notice: false,
+    headerEyebrow: '',
+    headerTitle: 'galleries.identity.title',
+    bannerEyebrow: '',
+    bannerTitle: 'galleries.identity.title',
+    bannerImage: 'chrome/thematic_gallery/thg_galleries/45/banner.jpg',
+  },
+
+  // The site's own chrome files (inventory-app#2233 D7), all legacy's: the
+  // MWNF logo, the three virtual museums' banners, gallery 45's banner and
+  // every gallery's tile picture (src/chrome.js).
+  chrome,
+  brand: { logo: 'logo.png', alt: 'galleries.identity.organisation' },
 
   links: mwnfLinks,
 

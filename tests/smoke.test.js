@@ -3,9 +3,10 @@ import { loadEntities, mergeMessages } from '@museumwnf/viewer-core'
 import {
   checkOfferedLanguages, checkRoutes, checkSectionMeta, checkTextsRendered, mountSite,
 } from '@museumwnf/viewer-core/testing'
-import { catalogues as sharedTexts } from '@museumwnf/viewer-i18n/standalone'
+import { catalogues as sharedTexts } from '@museumwnf/viewer-i18n/gallery'
 import ownTexts from '../locales/en.json'
 import config, { LANGUAGE_ENTITY } from '../src/dataset.config.js'
+import { galleryIcon, galleryImage } from '../src/composables/hub.js'
 
 // The same two layers main.js assembles, in the same order: the shared bundle
 // first, this website's own file last. Mounting without them would prove
@@ -20,22 +21,57 @@ async function mountOn(hash, selector) {
   return site
 }
 
+const texts = (host, selector) => [...host.querySelectorAll(selector)].map((node) => node.textContent.trim())
+
 describe('website smoke test', () => {
   it('mounts the home page: galleries picked from the package, and its partners', async () => {
     const { app, host } = await mountOn('#/', '.mwnf-sibling-galleries__gallery')
 
     expect(host.querySelector('.mwnf-page')).not.toBeNull()
-    expect(host.querySelector('.hub-home__title').textContent.trim()).toBe('MWNF Galleries')
-    // Four galleries drawn at random, and the three virtual museums beside them.
+    // Legacy's chrome, the gallery family's: the MWNF logo, gallery 45's
+    // banner with the hub's name and no line over it, legacy's menu.
+    expect(host.querySelector('.mwnf-header__brand-logo').getAttribute('src')).toMatch(/\/theme\/assets\/logo\.png$/)
+    expect(host.querySelector('.mwnf-banner__image').getAttribute('src')).toMatch(
+      /\/theme\/assets\/chrome\/thematic_gallery\/thg_galleries\/45\/banner\.jpg$/,
+    )
+    // The title, then legacy's "»" to the galleries list.
+    expect(host.querySelector('.mwnf-banner__title').textContent.trim()).toMatch(/^MWNF Galleries »$/)
+    expect(host.querySelector('.mwnf-banner__eyebrow')).toBeNull()
+    expect(texts(host, '.mwnf-nav__link')).toEqual(['About', 'All MWNF Galleries', 'Partners', 'Credits'])
+    // No text of its own: legacy's home has none.
+    expect(host.querySelector('.mwnf-content h1')).toBeNull()
+    // Four galleries drawn at random, each with its picture from this
+    // repository, and the three virtual museums' picture banners beside them.
     expect(host.querySelectorAll('.mwnf-sibling-galleries__gallery')).toHaveLength(4)
-    expect(host.querySelectorAll('.mwnf-sibling-galleries__museum')).toHaveLength(3)
+    for (const image of host.querySelectorAll('.mwnf-sibling-galleries__gallery img')) {
+      expect(image.getAttribute('src')).toMatch(/\/theme\/assets\/chrome\/thematic_gallery\/thg_galleries\/\d+\/1\.jpg$/)
+    }
+    expect([...host.querySelectorAll('.mwnf-sibling-galleries__museum img')].map((img) => img.getAttribute('src'))).toEqual([
+      expect.stringMatching(/\/theme\/assets\/dia\.jpg$/),
+      expect.stringMatching(/\/theme\/assets\/dba\.jpg$/),
+      expect.stringMatching(/\/theme\/assets\/sh\.jpg$/),
+    ])
+    expect(host.querySelectorAll('.mwnf-footer__social-link')).toHaveLength(6)
     // Each gallery links to its own site.
     for (const link of host.querySelectorAll('a.mwnf-sibling-galleries__gallery')) {
       expect(link.getAttribute('href')).toMatch(/^https:\/\/[a-z-]+\.museumwnf\.org/)
     }
+    expect(texts(host, '.mwnf-footer__link')).toEqual([
+      'About MWNF', 'Contact', 'Important Legal Notice', 'Credits', 'Cookies',
+    ])
 
     app.unmount()
   }, 60000)
+
+  it('finds a tile picture and an icon in this repository for every gallery', async () => {
+    const [galleries] = await loadEntities(['galleries'])
+
+    expect(galleries.length).toBeGreaterThan(0)
+    for (const gallery of galleries) {
+      expect(galleryImage(gallery), gallery.slug).toBeTruthy()
+      expect(galleryIcon(gallery), gallery.slug).toBeTruthy()
+    }
+  })
 
   it('lists every gallery the package carries, each linked to its site', async () => {
     const [galleries] = await loadEntities(['galleries'])
