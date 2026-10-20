@@ -107,7 +107,9 @@ export default {
   // header on inner pages and over the home banner, with no line above
   // either (legacy's "Welcome to" has no source), and gallery 45's banner.
   // The banner's caption needs its item, which the hub package doesn't ship.
+  // Legacy's hub has no search, so no "Database replaced" tip either.
   galleryShell: {
+    notice: false,
     headerEyebrow: '',
     headerTitle: 'galleries.identity.title',
     bannerEyebrow: '',
