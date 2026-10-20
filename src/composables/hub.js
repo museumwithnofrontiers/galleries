@@ -1,4 +1,6 @@
 import { entityRef, partnerView, useDataPackage } from '@museumwnf/viewer-core'
+import { chromePicture } from '@museumwnf/viewer-layout'
+import { chrome } from '../chrome.js'
 
 // The hub's records, read the one way every website reads them: lazily, each
 // entity a shared ref that stays `null` until a route declaring it in
@@ -40,15 +42,14 @@ export function galleryUrl(gallery) {
   return gallery?.legacy_host || null
 }
 
-// Each gallery's tile picture: legacy's (the `zoom` size of the picture the
-// package's `image_path` names), kept in this repository under the gallery's
-// legacy key rather than read from the legacy media server
-// (inventory-app#2233, decision D7). A gallery with no copy here shows none.
-const tiles = import.meta.glob('../assets/galleries/tiles/*.jpg', { eager: true, import: 'default' })
-
-/** The gallery's tile picture. */
+/**
+ * The gallery's tile picture: legacy's (the `zoom` size of the picture the
+ * package's `image_path` names), kept in this repository at
+ * `theme/assets/chrome/<image_path>` rather than read from the legacy media
+ * server (inventory-app#2233, decision D7). A gallery with no copy shows none.
+ */
 export function galleryImage(gallery) {
-  return tiles[`../assets/galleries/tiles/${gallery?.slug}.jpg`] ?? null
+  return chromePicture(chrome, gallery?.image_path)
 }
 
 // Each gallery's icon on the galleries list: legacy's own pictures, which only

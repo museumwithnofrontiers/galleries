@@ -1,84 +1,20 @@
 /*
- * MWNF Galleries — visual identity: the slate palette of the legacy hub
- * (legacy dxa-client, site `galleries`). This file belongs to the webdesigner.
+ * MWNF Galleries — visual identity.
  *
- * Full token documentation with explanations:
- * node_modules/@museumwnf/viewer-layout/src/tokens.reference.css
+ * Legacy's hub is a DXA gallery, and its palette is legacy's five colours for
+ * it, from inventory-app's .legacy-code/dxa-client/src/sites/galleries/_variables.scss.
+ * The gallery family's theme (@museumwnf/viewer-layout/dxa/gallery.css) reads
+ * them for every surface, text and border of the site. A token of that theme
+ * set again below wins over it; every token there is, and what it does, is in
+ * node_modules/@museumwnf/viewer-layout/src/tokens.reference.css.
+ *
+ * This file belongs to the webdesigner.
  */
 
 :root {
-  /* ---------- Global ---------- */
-  --mwnf-font-body: 'Roboto Condensed', 'Roboto', Arial, sans-serif;
-  --mwnf-font-heading: inherit;
-  --mwnf-line-height: 1.6;
-  --mwnf-weight-heading: 700;
-  --mwnf-color-text: #263238;
-  --mwnf-color-background: #eceff1;
-  --mwnf-color-accent: #36474f;
-  /* The shared components' links, in the slate they have always had here. */
-  --mwnf-link-text: #36474f;
-  --mwnf-color-muted: #555555;
-  --mwnf-color-border: #90a4ad;
-  --mwnf-content-width: 64rem;
-  --mwnf-content-padding: 1rem;
-  --mwnf-space: 0.75rem;
-  --mwnf-radius: 0.25rem;
-  --mwnf-section-border: 1px solid #90a4ad;
-  --mwnf-section-title-size: 1rem;
-
-  /* ---------- Header ---------- */
-  --mwnf-header-padding: 1.25rem;
-  --mwnf-header-background: #263238;
-  --mwnf-header-text: #ffffff;
-  --mwnf-header-title-size: 1.75rem;
-  --mwnf-header-subtitle-size: 1rem;
-  --mwnf-header-subtitle-color: #cfd8dc;
-
-  /* ---------- Banner ---------- */
-  --mwnf-banner-padding: 0;
-  --mwnf-banner-background: transparent;
-  --mwnf-banner-text-color: inherit;
-  --mwnf-banner-text-size: 1.25rem;
-  --mwnf-banner-max-height: 20rem;
-
-  /* ---------- Navigation ---------- */
-  --mwnf-nav-padding: 0.5rem;
-  --mwnf-nav-background: #36474f;
-  --mwnf-nav-border: none;
-  --mwnf-nav-gap: 1rem;
-  --mwnf-nav-link-color: #ffffff;
-  --mwnf-nav-link-active-color: #cfd8dc;
-  --mwnf-nav-link-weight: 500;
-
-  /* ---------- Content ---------- */
-  --mwnf-content-padding-block: 1.5rem;
-  --mwnf-content-background: transparent;
-
-  /* ---------- Hyperlinks ---------- */
-  --mwnf-hyperlinks-padding: 1rem;
-  --mwnf-hyperlinks-background: transparent;
-  --mwnf-hyperlinks-link-color: #36474f;
-
-  /* ---------- Sponsors ---------- */
-  --mwnf-sponsors-padding: 1rem;
-  --mwnf-sponsors-background: transparent;
-  --mwnf-sponsors-gap: 1.5rem;
-  --mwnf-sponsors-logo-height: 2.5rem;
-
-  /* ---------- Footer ---------- */
-  --mwnf-footer-padding: 1.25rem;
-  --mwnf-footer-background: #263238;
-  --mwnf-footer-text-color: #cfd8dc;
-  --mwnf-footer-text-size: 0.875rem;
-
-  /* ---------- Shared views (@museumwnf/viewer-core) ----------
-   * The page shell already centers and pads the content section, so the
-   * views inside it fill it edge to edge and inherit the fonts above. */
-  --vc-font-body: var(--mwnf-font-body);
-  --vc-line-height: var(--mwnf-line-height);
-  --vc-color-background: transparent;
-  --vc-color-text: inherit;
-  --vc-content-width: 100%;
-  --vc-content-padding: 0;
-  --vc-weight-label: 600;
+  --theme-dark:        #263238;  /* banner, header, footer */
+  --theme-medium-dark: #36474f;  /* dark menu items */
+  --theme-medium:      #3b5059;  /* text background, search button */
+  --theme-light:       #445c67;  /* light menu items */
+  --background-color:  #90a4ad;  /* page background */
 }

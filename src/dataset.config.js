@@ -1,13 +1,14 @@
 import {
   languageLabels, loadEntities, mwnfLinks, offeredLanguages, sectionMeta, useDataPackage,
 } from '@museumwnf/viewer-core'
+import { mwnfSocialLinks } from '@museumwnf/viewer-layout'
+import { GalleryShell } from '@museumwnf/viewer-layout/dxa'
 import { TextPageView } from '@museumwnf/viewer-layout/views'
-import SiteShell from './SiteShell.vue'
+import { chrome } from './chrome.js'
 import HubHome from './views/HubHome.vue'
 import GalleriesList from './views/GalleriesList.vue'
 import Partners from './views/Partners.vue'
 import Partner from './views/Partner.vue'
-import hubBanner from '../theme/assets/banner.jpg'
 
 // The whole declaration of the galleries hub. Before it mounts, the website
 // reads nothing from its package but the manifest: the languages it offers,
@@ -62,12 +63,16 @@ export default {
   // The site language. One per visit, negotiated once by viewer-core.
   languages,
 
-  shell: SiteShell,
+  // Legacy's hub is a DXA gallery (dxa-client, site galleries, gallery 45),
+  // so its chrome is the gallery family's shell, fed from `galleryShell`
+  // below rather than from a gallery package.
+  shell: GalleryShell,
 
-  // Everything viewer-layout's SiteShell reads to build the menu, the
-  // language switcher and the header/footer link lists: legacy's menu
-  // (About · All Galleries · Partners · Credits), "Home" in the header, and
-  // MWNF's pages in the footer.
+  // Everything the shell reads to build the menu, the language switcher and
+  // the header/footer link lists: legacy's menu (About · All Galleries ·
+  // Partners · Credits), under the banner on the home page and above it
+  // elsewhere; "Home" in the header; MWNF's pages and its social networks in
+  // the footer.
   navigation: {
     languages: languageLabels(languages),
     links: [
@@ -84,15 +89,37 @@ export default {
       { label: 'core.footer.credits', href: mwnfLinks.credits, external: true },
       { label: 'core.footer.cookies', href: mwnfLinks.cookies, external: true },
     ],
+    placement: ({ section }) => (section === 'home' ? 'after-banner' : 'before-banner'),
+    socialLinks: mwnfSocialLinks,
   },
 
-  // Legacy's banner, gallery 45's picture from this repository: the hub's
-  // name over it on the home page, a strip of it on every other page.
+  // Legacy's banner: a strip with the hub's name on the home page, its "»"
+  // leading to the galleries list; a section strip on every other page.
   banner: {
     variant: ({ section }) => (section === 'home' ? 'strip' : 'section'),
-    image: hubBanner,
-    title: ({ section, t }) => (section === 'home' ? t('galleries.identity.title') : ''),
+    captionLabel: 'layout.banner.detailFrom',
+    enter: ({ section, t }) => (section === 'home'
+      ? { label: '»', href: '#/galleries', ariaLabel: t('gallery.nav.allGalleries') }
+      : null),
   },
+
+  // What a gallery's package would give the shell: the hub's name in the
+  // header on inner pages and over the home banner, with no line above
+  // either (legacy's "Welcome to" has no source), and gallery 45's banner.
+  // The banner's caption needs its item, which the hub package doesn't ship.
+  galleryShell: {
+    headerEyebrow: '',
+    headerTitle: 'galleries.identity.title',
+    bannerEyebrow: '',
+    bannerTitle: 'galleries.identity.title',
+    bannerImage: 'chrome/thematic_gallery/thg_galleries/45/banner.jpg',
+  },
+
+  // The site's own chrome files (inventory-app#2233 D7), all legacy's: the
+  // MWNF logo, the three virtual museums' banners, gallery 45's banner and
+  // every gallery's tile picture (src/chrome.js).
+  chrome,
+  brand: { logo: 'logo.png', alt: 'galleries.identity.organisation' },
 
   links: mwnfLinks,
 

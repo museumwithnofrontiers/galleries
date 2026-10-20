@@ -39,11 +39,11 @@ inventory-app's
 
 ## Where things are
 
-- **`src/dataset.config.js`:** the whole declaration: routes, languages, menu, legacy addresses.
+- **`src/dataset.config.js`:** the whole declaration: routes, languages, menu, legacy addresses, and the chrome viewer-layout's gallery shell draws (legacy's hub is a DXA gallery, gallery 45).
 - **`src/composables/hub.js`:** the hub's records and what it derives from them (names, links, random picks, the partner view).
 - **`src/views/`:** the home page, the galleries list, the partner list and the partner page, composed from viewer-layout's shared components.
-- **`src/assets/galleries/`:** each gallery's icon, and under `tiles/` its tile picture, named after the gallery's legacy key. These are legacy's own pictures, kept here rather than on the legacy media server.
-- **`theme/assets/`:** legacy's chrome: the MWNF logo, gallery 45's banner and the three virtual museums' banners. `public/favicon.ico` is legacy's favicon.
+- **`src/assets/galleries/`:** each gallery's icon, named after the gallery's legacy key. These are legacy's own pictures, which only ever lived in its client.
+- **`theme/assets/`, `src/chrome.js`:** legacy's chrome, kept here rather than on the legacy media server: the MWNF logo (`logo.png`), the three virtual museums' banners (`dia.jpg`, `dba.jpg`, `sh.jpg`), and under `chrome/` gallery 45's banner and every gallery's tile picture, each at the legacy path the package names. `public/favicon.ico` is legacy's favicon.
 - **`locales/en.json`:** the hub's own texts. About, Credits and the partners intro come from legacy.
 
 The hub is English only: legacy carried its own texts in English alone. The

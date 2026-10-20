@@ -2,7 +2,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n, useSiteConfig } from '@museumwnf/viewer-core'
+import { chromeAsset } from '@museumwnf/viewer-layout'
 import { FeaturedPartners, SiblingGalleries } from '@museumwnf/viewer-layout/dxa'
+import { chrome } from '../chrome.js'
 import { featuredPartners, galleries, galleryImage, galleryName, galleryUrl, loadEnglish, pickRandom } from '../composables/hub.js'
 
 // The hub's home page, as legacy drew it (a DXA gallery home, gallery 45):
@@ -37,11 +39,13 @@ const galleryCards = computed(() =>
   })),
 )
 
-// The three virtual museums, in each project's colour, as every gallery site shows them.
+// The three virtual museums as every gallery site shows them: legacy's
+// picture banners (theme/assets/dia.jpg, dba.jpg, sh.jpg), each project's
+// colour behind them.
 const museums = computed(() => [
-  { name: t('core.project.islamicArt'), href: `${links.islamicArt}/`, accent: 'var(--mwnf-project-ISLandEPM, #ffcc00)', textColor: 'var(--mwnf-project-ISLandEPM-text, #000000)' },
-  { name: t('core.project.baroqueArt'), href: `${links.baroqueArt}/`, accent: 'var(--mwnf-project-DBA, #001d66)', textColor: 'var(--mwnf-project-DBA-text, #ffffff)' },
-  { name: t('core.project.sharingHistory'), href: `${links.sharingHistory}/`, accent: 'var(--mwnf-project-AWE, #900000)', textColor: 'var(--mwnf-project-AWE-text, #ffffff)' },
+  { name: t('core.project.islamicArt'), href: `${links.islamicArt}/`, image: chromeAsset(chrome, 'dia.jpg'), accent: 'var(--mwnf-project-ISLandEPM, #ffcc00)', textColor: 'var(--mwnf-project-ISLandEPM-text, #000000)' },
+  { name: t('core.project.baroqueArt'), href: `${links.baroqueArt}/`, image: chromeAsset(chrome, 'dba.jpg'), accent: 'var(--mwnf-project-DBA, #001d66)', textColor: 'var(--mwnf-project-DBA-text, #ffffff)' },
+  { name: t('core.project.sharingHistory'), href: `${links.sharingHistory}/`, image: chromeAsset(chrome, 'sh.jpg'), accent: 'var(--mwnf-project-AWE, #900000)', textColor: 'var(--mwnf-project-AWE-text, #ffffff)' },
 ])
 
 // "See more Galleries" leads to the hub's own list, as legacy's did.
