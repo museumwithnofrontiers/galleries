@@ -6,50 +6,36 @@
 // belongs to the shared component, once, and a website that duplicates it
 // drifts from the platform the next time SiteShell gains a feature.
 //
-// The one thing SiteShell cannot know is the header lockup: it is a text, and
-// a text is only available inside the application. `#brand` is the slot it
-// reserves for exactly that.
-import { useI18n } from '@museumwnf/viewer-core'
+// What is this website's own is legacy's chrome (it is a DXA gallery,
+// gallery 45): the MWNF logo, linking to MWNF's portal, and the footer's
+// copyright line with legacy's years.
+import { useI18n, useSiteConfig } from '@museumwnf/viewer-core'
 import { SiteShell } from '@museumwnf/viewer-layout/components'
+import mwnfLogo from '../theme/assets/mwnf-logo.png'
 
 const { t } = useI18n()
+const { links } = useSiteConfig()
+const currentYear = new Date().getFullYear()
 </script>
 
 <template>
   <SiteShell
     v-bind="$attrs"
-    header-home="#/"
-    :footer-text="t('galleries.identity.copyright')"
+    :header-home="links.portal"
+    :footer-text="`${t('core.footer.copyright')} 2004–${currentYear}`"
   >
     <template #brand>
-      <span class="site-logo">
-        <span class="site-logo-org">{{ t('galleries.identity.organisation') }}</span>
-        <span class="site-logo-title">{{ t('galleries.identity.title') }}</span>
-      </span>
+      <img class="site-logo" :src="mwnfLogo" :alt="t('galleries.identity.organisation')" />
     </template>
     <slot />
   </SiteShell>
 </template>
 
 <style scoped>
-/* The lockup only. Colours and fonts come from theme/tokens.css, which is
-   where this website's identity is set. */
+/* Legacy's logo, at its own size. */
 .site-logo {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  color: var(--mwnf-header-text);
-}
-.site-logo-org {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.8;
-}
-.site-logo-title {
-  font-size: 28px;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  display: block;
+  width: 120px;
+  height: 50px;
 }
 </style>

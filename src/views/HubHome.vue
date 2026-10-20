@@ -1,17 +1,21 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n, useSiteConfig } from '@museumwnf/viewer-core'
 import { FeaturedPartners, SiblingGalleries } from '@museumwnf/viewer-layout/dxa'
 import { featuredPartners, galleries, galleryImage, galleryName, galleryUrl, loadEnglish, pickRandom } from '../composables/hub.js'
 
-// The hub's home page, as legacy drew it: four galleries picked at random,
-// each linked to its site, with the three MWNF virtual museums beside them,
-// then a carousel of three partners picked at random. Legacy drew both picks
-// per request and read no flag for either (inventory-app
+// The hub's home page, as legacy drew it (a DXA gallery home, gallery 45):
+// under the banner, a carousel of three partners picked at random, then four
+// galleries picked at random, each linked to its site, with "See more
+// Galleries" and the three MWNF virtual museums beside them. Legacy drew both
+// picks per request and read no flag for either (inventory-app
 // scripts/exporters/docs/galleries-hub-data-package.md), so they are drawn
-// here per visit from the package's full lists.
+// here per visit from the package's full lists. Legacy has no text of its
+// own on this page.
 const { t, locale } = useI18n()
 const { links } = useSiteConfig()
+const router = useRouter()
 
 const GALLERY_COUNT = 4
 const PARTNER_COUNT = 3
@@ -39,37 +43,21 @@ const museums = computed(() => [
   { name: t('core.project.baroqueArt'), href: `${links.baroqueArt}/`, accent: 'var(--mwnf-project-DBA, #001d66)', textColor: 'var(--mwnf-project-DBA-text, #ffffff)' },
   { name: t('core.project.sharingHistory'), href: `${links.sharingHistory}/`, accent: 'var(--mwnf-project-AWE, #900000)', textColor: 'var(--mwnf-project-AWE-text, #ffffff)' },
 ])
+
+// "See more Galleries" leads to the hub's own list, as legacy's did.
+const seeMoreGalleriesHref = router.resolve({ name: 'galleries' }).href
 </script>
 
 <template>
   <div class="hub-home">
-    <h1 class="hub-home__title">{{ t('galleries.identity.title') }}</h1>
-    <p class="hub-home__intro">{{ t('galleries.home.intro') }}</p>
-
+    <FeaturedPartners :partners="partnerCards" />
     <SiblingGalleries
       :galleries="galleryCards"
       :museums="museums"
-      galleries-heading-entry="galleries.home.visitGalleries"
-      museums-heading-entry="galleries.home.otherVirtualMuseums"
+      galleries-heading-entry="gallery.action.visitGalleries"
+      see-more-galleries-entry="gallery.action.seeMoreGalleries"
+      :see-more-galleries-href="seeMoreGalleriesHref"
+      museums-heading-entry="gallery.siblings.otherVirtualMuseums"
     />
-    <p class="hub-home__more">
-      <RouterLink class="mwnf-button" :to="{ name: 'galleries' }">{{ t('galleries.home.seeAllGalleries') }}</RouterLink>
-    </p>
-
-    <FeaturedPartners :partners="partnerCards" />
   </div>
 </template>
-
-<style scoped>
-.hub-home__title {
-  margin: 0 0 var(--mwnf-space);
-}
-
-.hub-home__intro {
-  margin: 0 0 calc(var(--mwnf-space) * 2);
-}
-
-.hub-home__more {
-  margin: var(--mwnf-space) 0 calc(var(--mwnf-space) * 2);
-}
-</style>

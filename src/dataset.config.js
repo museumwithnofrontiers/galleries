@@ -7,6 +7,7 @@ import HubHome from './views/HubHome.vue'
 import GalleriesList from './views/GalleriesList.vue'
 import Partners from './views/Partners.vue'
 import Partner from './views/Partner.vue'
+import hubBanner from '../theme/assets/banner.jpg'
 
 // The whole declaration of the galleries hub. Before it mounts, the website
 // reads nothing from its package but the manifest: the languages it offers,
@@ -64,22 +65,33 @@ export default {
   shell: SiteShell,
 
   // Everything viewer-layout's SiteShell reads to build the menu, the
-  // language switcher and the header/footer link lists.
+  // language switcher and the header/footer link lists: legacy's menu
+  // (About · All Galleries · Partners · Credits), "Home" in the header, and
+  // MWNF's pages in the footer.
   navigation: {
     languages: languageLabels(languages),
     links: [
-      { section: 'home', label: 'core.nav.home', to: { name: 'home' } },
-      { section: 'galleries', label: 'galleries.nav.galleries', to: { name: 'galleries' } },
-      { section: 'partners', label: 'core.nav.partners', to: { name: 'partners' } },
       { section: 'about', label: 'galleries.nav.about', to: { name: 'about' } },
+      { section: 'galleries', label: 'gallery.nav.allGalleries', to: { name: 'galleries' } },
+      { section: 'partners', label: 'core.nav.partners', to: { name: 'partners' } },
       { section: 'credits', label: 'galleries.nav.credits', to: { name: 'credits' } },
+    ],
+    headerLinks: [{ label: 'core.nav.home', to: { name: 'home' } }],
+    footerLinks: [
+      { label: 'core.footer.aboutMwnf', href: mwnfLinks.about, external: true },
+      { label: 'core.footer.contact', href: mwnfLinks.contact, external: true },
+      { label: 'core.footer.legalNotice', href: mwnfLinks.legalNotice, external: true },
+      { label: 'core.footer.credits', href: mwnfLinks.credits, external: true },
+      { label: 'core.footer.cookies', href: mwnfLinks.cookies, external: true },
     ],
   },
 
-  // Where this website's media lives: the legacy media server carries the
-  // gallery pictures whose paths the package ships.
-  media: {
-    legacyHost: 'https://images.museumwnf.org',
+  // Legacy's banner, gallery 45's picture from this repository: the hub's
+  // name over it on the home page, a strip of it on every other page.
+  banner: {
+    variant: ({ section }) => (section === 'home' ? 'strip' : 'section'),
+    image: hubBanner,
+    title: ({ section, t }) => (section === 'home' ? t('galleries.identity.title') : ''),
   },
 
   links: mwnfLinks,

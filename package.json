@@ -12,7 +12,7 @@
     "lint": "eslint ."
   },
   "viewerI18n": {
-    "class": "standalone",
+    "class": "gallery",
     "namespace": "galleries"
   },
   "dependencies": {

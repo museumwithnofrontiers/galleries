@@ -3,9 +3,10 @@ import { loadEntities, mergeMessages } from '@museumwnf/viewer-core'
 import {
   checkOfferedLanguages, checkRoutes, checkSectionMeta, checkTextsRendered, mountSite,
 } from '@museumwnf/viewer-core/testing'
-import { catalogues as sharedTexts } from '@museumwnf/viewer-i18n/standalone'
+import { catalogues as sharedTexts } from '@museumwnf/viewer-i18n/gallery'
 import ownTexts from '../locales/en.json'
 import config, { LANGUAGE_ENTITY } from '../src/dataset.config.js'
+import { galleryIcon, galleryImage } from '../src/composables/hub.js'
 
 // The same two layers main.js assembles, in the same order: the shared bundle
 // first, this website's own file last. Mounting without them would prove
@@ -20,22 +21,47 @@ async function mountOn(hash, selector) {
   return site
 }
 
+const texts = (host, selector) => [...host.querySelectorAll(selector)].map((node) => node.textContent.trim())
+
 describe('website smoke test', () => {
   it('mounts the home page: galleries picked from the package, and its partners', async () => {
     const { app, host } = await mountOn('#/', '.mwnf-sibling-galleries__gallery')
 
     expect(host.querySelector('.mwnf-page')).not.toBeNull()
-    expect(host.querySelector('.hub-home__title').textContent.trim()).toBe('MWNF Galleries')
-    // Four galleries drawn at random, and the three virtual museums beside them.
+    // Legacy's chrome: the MWNF logo, gallery 45's banner with the hub's name, legacy's menu.
+    expect(host.querySelector('.mwnf-header img').getAttribute('src')).toMatch(/\/theme\/assets\/mwnf-logo\.png$/)
+    expect(host.querySelector('.mwnf-banner__image').getAttribute('src')).toMatch(/\/theme\/assets\/banner\.jpg$/)
+    expect(host.querySelector('.mwnf-banner__title').textContent.trim()).toBe('MWNF Galleries')
+    expect(texts(host, '.mwnf-nav__link')).toEqual(['About', 'All MWNF Galleries', 'Partners', 'Credits'])
+    // No text of its own: legacy's home has none.
+    expect(host.querySelector('.mwnf-content h1')).toBeNull()
+    // Four galleries drawn at random, each with its picture from this
+    // repository, and the three virtual museums beside them.
     expect(host.querySelectorAll('.mwnf-sibling-galleries__gallery')).toHaveLength(4)
+    for (const image of host.querySelectorAll('.mwnf-sibling-galleries__gallery img')) {
+      expect(image.getAttribute('src')).toMatch(/\/assets\/galleries\/tiles\/[a-z_]+\.jpg$/)
+    }
     expect(host.querySelectorAll('.mwnf-sibling-galleries__museum')).toHaveLength(3)
     // Each gallery links to its own site.
     for (const link of host.querySelectorAll('a.mwnf-sibling-galleries__gallery')) {
       expect(link.getAttribute('href')).toMatch(/^https:\/\/[a-z-]+\.museumwnf\.org/)
     }
+    expect(texts(host, '.mwnf-footer__link')).toEqual([
+      'About MWNF', 'Contact', 'Important Legal Notice', 'Credits', 'Cookies',
+    ])
 
     app.unmount()
   }, 60000)
+
+  it('finds a tile picture and an icon in this repository for every gallery', async () => {
+    const [galleries] = await loadEntities(['galleries'])
+
+    expect(galleries.length).toBeGreaterThan(0)
+    for (const gallery of galleries) {
+      expect(galleryImage(gallery), gallery.slug).toBeTruthy()
+      expect(galleryIcon(gallery), gallery.slug).toBeTruthy()
+    }
+  })
 
   it('lists every gallery the package carries, each linked to its site', async () => {
     const [galleries] = await loadEntities(['galleries'])
