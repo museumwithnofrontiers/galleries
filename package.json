@@ -16,7 +16,7 @@
     "namespace": "galleries"
   },
   "dependencies": {
-    "@museumwnf/galleries-data": "^1.0.6",
+    "@museumwnf/galleries-data": "^1.0.7",
     "@museumwnf/viewer-core": "^2.8.0",
     "@museumwnf/viewer-i18n": "^6.1.0",
     "@museumwnf/viewer-layout": "^3.8.0",
