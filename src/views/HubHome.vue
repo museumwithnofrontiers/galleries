@@ -53,7 +53,8 @@ const seeMoreGalleriesHref = router.resolve({ name: 'galleries' }).href
 </script>
 
 <template>
-  <div class="hub-home">
+  <!-- The gallery family's home block, which lays its parts out as legacy's. -->
+  <div class="hub-home mwnf-dxa-home">
     <FeaturedPartners :partners="partnerCards" />
     <SiblingGalleries
       :galleries="galleryCards"

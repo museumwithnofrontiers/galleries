@@ -76,12 +76,13 @@ const partnerRoute = (partner) => ({ name: 'partner', params: { id: partner.id }
 
 /**
  * What differs by site in viewer-core's partner view-model: the country
- * label and the partner's own page. There is no objects page: the hub ships
- * no items, and every partner's `item_count` is 0.
+ * label, the partner's own page and the page of its objects (legacy's
+ * "View objects", for a partner holding some, #2425).
  */
 export const partnerViewCtx = {
   countryLabel: (id) => countryLabel(id),
   route: partnerRoute,
+  objectsRoute: (partner) => (partner.item_count > 0 ? { name: 'partner-objects', params: { id: partner.id } } : null),
 }
 
 /** Legacy's featured partners: `count` of them at random, as viewer-core's `partnerView()` builds them. */
@@ -91,43 +92,5 @@ export function featuredPartners(count, lang = 'en') {
   )
 }
 
-/**
- * The partner directory, on viewer-layout's `PartnerListView`: legacy's DXA
- * shape — no tiers, grouped by country, with the A–Z / Z–A toggle.
- */
-export const partnerList = {
-  group: { tier: false, order: 'country' },
-  variant: 'open',
-  orderToggle: true,
-  route: 'partner',
-  actions: true,
-  label: (countryId) => countryLabel(countryId),
-}
-
-/**
- * The partner page, as viewer-layout's `PartnerDetail` reads a family: legacy's
- * tab strip (About · Contact · Logo · homepage) is `PartnerPanel`'s, so the
- * sheet itself shows no field of its own. Every hub partner has a page.
- */
-export const partnerDetail = {
-  spec: {
-    entity: 'partners',
-    fields: [],
-    credits: [],
-    citation: false,
-    related: false,
-    route: 'partner',
-    media: () => [],
-  },
-  visible: () => true,
-  view: (partner, text) => partnerView(partner, text, partnerViewCtx),
-  labels: { partner: {} },
-}
-
-/**
- * Legacy's "Partner" or "Affiliate": a partner curated at level `partner` in
- * the hub's project is a Partner, one with no level an Affiliate.
- */
-export function isCuratedPartner(partner) {
-  return partner?.level === 'partner'
-}
+// The partner list, a partner's page and its objects are the gallery
+// family's (dataset.config.js), as legacy's hub was a DXA gallery.
