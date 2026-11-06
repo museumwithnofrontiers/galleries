@@ -2,13 +2,13 @@ import {
   languageLabels, loadEntities, mwnfLinks, offeredLanguages, sectionMeta, useDataPackage,
 } from '@museumwnf/viewer-core'
 import { mwnfSocialLinks } from '@museumwnf/viewer-layout'
-import { GalleryShell } from '@museumwnf/viewer-layout/dxa'
-import { TextPageView } from '@museumwnf/viewer-layout/views'
+import {
+  GalleryAbout, GalleryCredits, GalleryItemDetail, GalleryPartnerObjects, GalleryPartners, GalleryShell, PartnerDetail,
+  galleryPartnerDetail,
+} from '@museumwnf/viewer-layout/dxa'
 import { chrome } from './chrome.js'
 import HubHome from './views/HubHome.vue'
 import GalleriesList from './views/GalleriesList.vue'
-import Partners from './views/Partners.vue'
-import Partner from './views/Partner.vue'
 
 // The whole declaration of the galleries hub. Before it mounts, the website
 // reads nothing from its package but the manifest: the languages it offers,
@@ -16,9 +16,11 @@ import Partner from './views/Partner.vue'
 // loaded by the route that reads it. Nothing else in `src/` imports
 // `@inventory-data`.
 //
-// The hub lists every MWNF gallery and legacy's partner directory; its package
-// ships no items (@museumwnf/galleries-data, inventory-app
-// scripts/exporters/docs/galleries-hub-data-package.md).
+// The hub lists every MWNF gallery and legacy's partner directory, and its
+// partners' MWNF Galleries objects (@museumwnf/galleries-data, inventory-app
+// scripts/exporters/docs/galleries-hub-data-package.md, #2425). Legacy's hub
+// is a DXA gallery, so its partner list, partner pages, partner objects and
+// object pages are the gallery family's.
 
 const { manifest } = useDataPackage()
 
@@ -29,15 +31,17 @@ export const LANGUAGE_ENTITY = 'partners'
 const languages = offeredLanguages({ entity: LANGUAGE_ENTITY })
 
 // Every route names the section it belongs to and the entities its own view
-// reads on top of that; this website has no chrome entities every page loads
-// regardless, so `sectionMeta()` takes none.
-const meta = sectionMeta()
+// reads on top of that; every page loads the hub's record and its objects,
+// which the shell's banner caption reads, as on a gallery site.
+const meta = sectionMeta(['gallery', 'items', 'partners', 'countries'])
 
-// The About and Credits pages: viewer-layout's TextPageView on one body entry
-// and a link back to the landing page.
-const back = { label: 'core.action.back', to: { name: 'home' } }
-const about = { body: 'galleries.about.body', back }
-const credits = { body: 'galleries.credits.body', back }
+
+/** An object by legacy's own key (`<database>/<country>/<museum id>/<number>`), for legacy's object addresses. */
+async function itemByLegacyKey(database, country, museum, number) {
+  const [items] = await loadEntities(['items'])
+  const key = `mwnf3:objects:${database}:${country}:${museum}:${number}`
+  return items.find((item) => item.backward_compatibility === key) ?? null
+}
 
 /** A partner by legacy's own key (`<country>/<museum id>`), for legacy's partner addresses. */
 async function partnerByLegacyKey(country, museum) {
@@ -53,6 +57,16 @@ export default {
 
   // The website's name, as the package declares it.
   siteName: manifest.site?.names?.en ?? 'MWNF Galleries',
+
+  // The address this build is deployed at, base path included: the object
+  // sheet's source credit and citation, and the sibling sites' links, read it.
+  site: { origin: 'https://museumwithnofrontiers.github.io/galleries' },
+
+  // The source-database chip's colour on the object sheet, per project: the
+  // hub's objects are all MWNF Galleries records.
+  projectColors: {
+    'a0817323-79ca-53fc-95ac-9f65ee2fcbac': 'mwnf-chip--Galleries', // MWNF Galleries
+  },
 
   features: {
     // No generic entity pages: those routes expose the data package's shape
@@ -77,7 +91,7 @@ export default {
     languages: languageLabels(languages),
     links: [
       { section: 'about', label: 'galleries.nav.about', to: { name: 'about' } },
-      { section: 'galleries', label: 'gallery.nav.allGalleries', to: { name: 'galleries' } },
+      { section: 'galleries', label: 'galleries.nav.allGalleries', to: { name: 'galleries' } },
       { section: 'partners', label: 'core.nav.partners', to: { name: 'partners' } },
       { section: 'credits', label: 'galleries.nav.credits', to: { name: 'credits' } },
     ],
@@ -103,16 +117,17 @@ export default {
       : null),
   },
 
-  // What a gallery's package would give the shell: the hub's name in the
-  // header on inner pages and over the home banner, with no line above
-  // either (legacy's "Welcome to" has no source), and gallery 45's banner.
-  // The banner's caption needs its item, which the hub package doesn't ship.
-  // Legacy's hub has no search, so no "Database replaced" tip either.
+  // What differs from a gallery's shell: the hub's name in the header on
+  // inner pages and over the home banner, legacy's "Welcome to" above it on
+  // the home page and no line above the header's, and gallery 45's banner
+  // picture from this repository. The banner's caption is the shell's own,
+  // from the package's `gallery.json` and the object it names. Legacy's hub
+  // has no search, so no "Database replaced" tip either.
   galleryShell: {
     notice: false,
     headerEyebrow: '',
     headerTitle: 'galleries.identity.title',
-    bannerEyebrow: '',
+    bannerEyebrow: 'galleries.home.welcomeTo',
     bannerTitle: 'galleries.identity.title',
     bannerImage: 'chrome/thematic_gallery/thg_galleries/45/banner.jpg',
   },
@@ -145,35 +160,51 @@ export default {
     {
       path: '/partners',
       name: 'partners',
-      component: Partners,
-      meta: meta('partners', 'partners', 'countries'),
+      component: GalleryPartners,
+      meta: meta('partners', 'partners', 'countries', 'items'),
     },
     {
       path: '/partner/:id',
       name: 'partner',
-      component: Partner,
-      props: true,
-      meta: meta('partners', 'partners', 'countries'),
+      component: PartnerDetail,
+      props: (route) => ({ id: route.params.id, family: galleryPartnerDetail }),
+      meta: meta('partners', 'partners', 'countries', 'items', 'languages'),
     },
+    {
+      path: '/partner/:id/objects',
+      name: 'partner-objects',
+      component: GalleryPartnerObjects,
+      meta: meta('partners', 'partners', 'countries', 'items'),
+    },
+    {
+      path: '/item/:id',
+      name: 'item',
+      component: GalleryItemDetail,
+      props: true,
+      meta: meta(
+        'database', 'items', 'partners', 'countries', 'languages', 'tags', 'dynasties', 'glossary', 'timelines',
+        'timeline_events',
+      ),
+    },
+    // The About and Credits pages as a gallery's, in legacy's centred column:
+    // About reads the shared entry, which locales/en.json overloads with the
+    // hub's own text, as it does the partner list's introduction.
     {
       path: '/about',
       name: 'about',
-      component: TextPageView,
-      props: { spec: about },
+      component: GalleryAbout,
       meta: meta('about'),
     },
     {
       path: '/credits',
       name: 'credits',
-      component: TextPageView,
-      props: { spec: credits },
+      component: GalleryCredits,
+      props: { bodyKey: 'galleries.credits.body' },
       meta: meta('credits'),
     },
   ],
 
   // Legacy's addresses, each resolving onto a canonical route above.
-  // Legacy's item sheets, partner objects and timeline are not rebuilt (the
-  // hub ships no items), so their addresses reach the not-found page.
   legacyRoutes: [
     { path: '/list/:page?', resolve: () => ({ name: 'galleries' }) },
     {
@@ -181,6 +212,21 @@ export default {
       resolve: async ({ country, museum }) => {
         const partner = await partnerByLegacyKey(country, museum)
         return partner ? { name: 'partner', params: { id: partner.id } } : null
+      },
+    },
+    {
+      path: '/partner-objects/:database/:country/:museum/:page?',
+      resolve: async ({ country, museum, page }) => {
+        const partner = await partnerByLegacyKey(country, museum)
+        if (!partner) return null
+        return { name: 'partner-objects', params: { id: partner.id }, query: Number(page) > 1 ? { page } : {} }
+      },
+    },
+    {
+      path: '/database-item/:database/:country/:museum/:number/:language?',
+      resolve: async ({ database, country, museum, number }) => {
+        const item = await itemByLegacyKey(database, country, museum, number)
+        return item ? { name: 'item', params: { id: item.id } } : null
       },
     },
   ],
