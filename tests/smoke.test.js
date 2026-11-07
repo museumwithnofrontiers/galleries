@@ -79,16 +79,35 @@ describe('website smoke test', () => {
     }
   })
 
-  it('lists every gallery the package carries, each linked to its site', async () => {
+  it('lists every gallery the package carries on /list, each linked to its site', async () => {
     const [galleries] = await loadEntities(['galleries'])
-    const { app, host } = await mountOn('#/galleries', '.hub-galleries__card')
+    const { app, host } = await mountOn('#/list', '.hub-list__card')
 
-    const cards = host.querySelectorAll('.hub-galleries__card')
+    const cards = host.querySelectorAll('.hub-list__card')
     expect(cards).toHaveLength(galleries.length)
     expect(cards[0].textContent.trim()).toBe(galleries[0].names.en)
-    expect(host.querySelector('.hub-galleries__count').textContent).toContain(String(galleries.length))
+    expect(host.querySelector('.hub-list__count').textContent).toContain(String(galleries.length))
     // Legacy's icon for every gallery, bundled with the site.
     expect([...cards].every((card) => card.querySelector('img'))).toBe(true)
+    // Every gallery on one page: neither the featured band nor the pager.
+    expect(host.querySelector('.hub-list__featured')).toBeNull()
+    expect(host.querySelector('.mwnf-dxa-gallery-pages')).toBeNull()
+    expect(host.querySelector('.mwnf-banner__title').textContent.trim()).toBe('Galleries List')
+
+    app.unmount()
+  }, 60000)
+
+  it("pages the galleries eight at a time on /list/<page>, as legacy's list", async () => {
+    const [galleries] = await loadEntities(['galleries'])
+    const { app, host } = await mountOn('#/list/1', '.hub-list__card')
+
+    expect([...host.querySelectorAll('.hub-list__card')].map((card) => card.textContent.trim()))
+      .toEqual(galleries.slice(0, 8).map((gallery) => gallery.names.en))
+    // The first page features six galleries at random, over legacy's pager.
+    await vi.waitFor(() => expect(host.querySelectorAll('.hub-list__featured-tile')).toHaveLength(6), { timeout: 20000 })
+    expect(host.querySelector('.mwnf-dxa-gallery-pages')).not.toBeNull()
+    expect(host.querySelector('.hub-list__all').textContent.trim()).toBe('Show All Galleries')
+    expect(host.querySelector('.mwnf-banner__title')).toBeNull()
 
     app.unmount()
   }, 60000)
@@ -161,8 +180,10 @@ describe('website smoke test', () => {
   }
 
   it("redirects legacy's addresses to their pages", async () => {
-    const list = await mountSite(config, messages, '#/list/1')
+    // The list's address before it took legacy's own.
+    const list = await mountSite(config, messages, '#/galleries')
     await vi.waitFor(() => expect(list.router.currentRoute.value.name).toBe('galleries'), { timeout: 20000 })
+    expect(list.router.currentRoute.value.params.page).toBe('1')
     list.app.unmount()
 
     // Legacy's partner address names the museum by country and legacy id.
@@ -194,7 +215,7 @@ describe('website smoke test', () => {
       checkRoutes(config, {
         names: ['home', 'galleries', 'partners', 'partner', 'partner-objects', 'item', 'about', 'credits'],
         legacyPaths: [
-          '/list/:page?',
+          '/galleries',
           '/partner/:database/:country/:museum/:language?',
           '/partner-objects/:database/:country/:museum/:page?',
           '/database-item/:database/:country/:museum/:number/:language?',
@@ -235,7 +256,7 @@ describe('website smoke test', () => {
   it('renders the shared texts and its own over them, on every page', async () => {
     for (const [hash, selector] of [
       ['#/', '.mwnf-sibling-galleries__gallery'],
-      ['#/galleries', '.hub-galleries__card'],
+      ['#/list/1', '.hub-list__card'],
       ['#/partners', '.mwnf-dxa-gallery-partners__partner'],
     ]) {
       const { app, host } = await mountOn(hash, selector)
