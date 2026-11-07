@@ -57,9 +57,10 @@ describe('website smoke test', () => {
       expect.stringMatching(/\/theme\/assets\/sh\.jpg$/),
     ])
     expect(host.querySelectorAll('.mwnf-footer__social-link')).toHaveLength(6)
-    // Each gallery links to its own site.
+    // Each gallery links to its own site: its new site from viewer-core
+    // 2.18.0 on (inventory-app#2482), its legacy host before.
     for (const link of host.querySelectorAll('a.mwnf-sibling-galleries__gallery')) {
-      expect(link.getAttribute('href')).toMatch(/^https:\/\/[a-z-]+\.museumwnf\.org/)
+      expect(link.getAttribute('href')).toMatch(/^https:\/\/(museumwithnofrontiers\.github\.io\/[a-z-]+\/#\/|[a-z-]+\.museumwnf\.org)/)
     }
     expect(texts(host, '.mwnf-footer__link')).toEqual([
       'About MWNF', 'Contact', 'Important Legal Notice', 'Credits', 'Cookies',
