@@ -91,7 +91,7 @@ export default {
     languages: languageLabels(languages),
     links: [
       { section: 'about', label: 'galleries.nav.about', to: { name: 'about' } },
-      { section: 'galleries', label: 'galleries.nav.allGalleries', to: { name: 'galleries' } },
+      { section: 'galleries', label: 'galleries.nav.allGalleries', to: { name: 'galleries', params: { page: '1' } } },
       { section: 'partners', label: 'core.nav.partners', to: { name: 'partners' } },
       { section: 'credits', label: 'galleries.nav.credits', to: { name: 'credits' } },
     ],
@@ -105,15 +105,26 @@ export default {
     ],
     placement: ({ section }) => (section === 'home' ? 'after-banner' : 'before-banner'),
     socialLinks: mwnfSocialLinks,
+    // The inner pages' banner titles, as a gallery's; the galleries list has
+    // its own (`banner.title` below).
+    sectionTitles: {
+      about: 'core.section.about',
+      credits: 'core.section.credits',
+      partners: 'core.section.partners',
+      database: 'core.section.database',
+    },
   },
 
   // Legacy's banner: a strip with the hub's name on the home page, its "»"
-  // leading to the galleries list; a section strip on every other page.
+  // leading to the galleries list's first page; a section strip on every
+  // other page, titled "Galleries List" over every gallery (/list) and not
+  // at all over a page of them (/list/<page>).
   banner: {
     variant: ({ section }) => (section === 'home' ? 'strip' : 'section'),
     captionLabel: 'layout.banner.detailFrom',
+    title: ({ route, t }) => (route?.name === 'galleries' && !route.params.page ? t('galleries.list.bannerTitle') : ''),
     enter: ({ section, t }) => (section === 'home'
-      ? { label: '»', href: '#/galleries', ariaLabel: t('gallery.nav.allGalleries') }
+      ? { label: '»', href: '#/list/1', ariaLabel: t('gallery.nav.allGalleries') }
       : null),
   },
 
@@ -152,7 +163,8 @@ export default {
       meta: meta('home', 'galleries', 'partners', 'countries'),
     },
     {
-      path: '/galleries',
+      // Legacy's own addresses: /list, every gallery; /list/<page>, eight of them.
+      path: '/list/:page?',
       name: 'galleries',
       component: GalleriesList,
       meta: meta('galleries', 'galleries'),
@@ -206,7 +218,8 @@ export default {
 
   // Legacy's addresses, each resolving onto a canonical route above.
   legacyRoutes: [
-    { path: '/list/:page?', resolve: () => ({ name: 'galleries' }) },
+    // The list's address before it took legacy's own.
+    { path: '/galleries', resolve: () => ({ name: 'galleries', params: { page: '1' } }) },
     {
       path: '/partner/:database/:country/:museum/:language?',
       resolve: async ({ country, museum }) => {
